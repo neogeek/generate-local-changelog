@@ -1,0 +1,208 @@
+#!/bin/bash
+
+VERSION=1.0.0
+
+NO_MERGES_FOUND_MESSAGE="No merges found"
+INITIAL_RELEASE="Initial release! 🎉"
+
+GIT_URL=$(git config --get remote.origin.url | sed -E 's/^git@|https?:\/\///' | sed -E 's/.git$//' | sed -E 's/:/\//')
+
+declare -a TAGS
+declare -a TAG_HASHES
+
+TAGS=(HEAD)
+TAG_HASHES=(HEAD)
+
+UNRELEASED=false
+
+INCLUDE_INCOMPLETE_MERGES=false
+
+parseOptions() {
+
+    local args=("${@// /}")
+
+    for arg in "${args[@]}"; do
+
+        case $arg in
+
+        -u | --unreleased)
+            UNRELEASED=true
+            ;;
+        -i | --include-incomplete-merges)
+            INCLUDE_INCOMPLETE_MERGES=true
+            ;;
+        -v | --version)
+            displayVersion
+            exit
+            ;;
+        -h | --help)
+            displayHelp
+            exit
+            ;;
+        ?*)
+            printf "Invalid option %s\n\n" "${arg}" >&2
+            displayHelp
+            exit
+            ;;
+
+        esac
+
+    done
+
+}
+
+displayVersion() {
+
+    echo "${VERSION}" >&2
+
+}
+
+displayHelp() {
+
+    echo "Usage: generate-local-changelog > CHANGELOG.md
+
+OPTIONS:
+   -u, --unreleased                     Includes unreleased merges
+   -i, --include-incomplete-merges      Includes incomplete merges (See repo for more info)
+   -v, --version                        Show the version number and then exit
+   -h, --help                           Show this help message and then exit" >&2
+
+}
+
+parseTags() {
+
+    local RAW_TAGS
+
+    RAW_TAGS=$(git log --tags --simplify-by-decoration --pretty="format:%at %D" --no-walk | sort -r -g | sed -E 's/^[0-9]* //' | sed -E 's/^.*tag:[ ]*//' | sed -E 's/,.*$//')
+
+    for TAG in ${RAW_TAGS}; do
+
+        local TAG_HASH
+        local TAG_TIME_COMMIT_MESSAGE
+        local COMMIT_HASH
+
+        TAG_HASH=$(git rev-parse "${TAG}")
+        TAG_TIME_COMMIT_MESSAGE=$(git log -n1 --pretty=format:'%at - %s' "${TAG_HASH}")
+        COMMIT_HASH=$(git log HEAD --pretty=format:'%H %at - %s' | grep --fixed-strings "${TAG_TIME_COMMIT_MESSAGE}" | sed -E 's/ .*$//')
+
+        TAGS[${#TAGS[@]}]="${TAG}"
+        TAG_HASHES[${#TAG_HASHES[@]}]="${COMMIT_HASH}"
+
+    done
+
+}
+
+outputChangelog() {
+
+    printf "# Changelog\n\n"
+
+    TAGS_LENGTH=${#TAGS[@]}
+
+    for ((i = 0; i < "$TAGS_LENGTH"; i++)); do
+
+        if [ -z "${TAG_HASHES[$i]}" ] || [[ "${TAG_HASHES[$i]}" == "HEAD" && "${UNRELEASED}" == false ]]; then
+
+            continue
+
+        fi
+
+        local DATE
+        declare -a MERGES
+
+        DATE=$(git log -n1 --pretty=format:'%cd' "${TAGS[$i]}" --date=short)
+
+        # shellcheck disable=SC2207
+        MERGES=($(git log --merges --pretty=format:'%H' "${TAG_HASHES[$i + 1]}..${TAG_HASHES[$i]}"))
+
+        if [ ${INCLUDE_INCOMPLETE_MERGES} == true ]; then
+
+            declare -a INCOMPLETE_MERGES
+
+            # shellcheck disable=SC2207
+            INCOMPLETE_MERGES=($(git log --no-merges --pretty=format:'%H - %s' "${TAG_HASHES[$i + 1]}..${TAG_HASHES[$i]}" | grep '(#[0-9]*)' | grep -o -E '^[0-9a-z]+'))
+
+            MERGES+=("${INCOMPLETE_MERGES[@]}")
+
+        fi
+
+        if [[ "${GIT_URL}" =~ "github" ]]; then
+            printf "## [%s](https://%s/tree/%s) - (%s)\n\n" "${TAGS[$i]}" "${GIT_URL}" "${TAGS[$i]}" "${DATE}"
+        elif [[ "${GIT_URL}" =~ "bitbucket" ]]; then
+            printf "## [%s](https://%s/src/%s) - (%s)\n\n" "${TAGS[$i]}" "${GIT_URL}" "${TAGS[$i]}" "${DATE}"
+        elif [[ "${GIT_URL}" =~ "gitlab" ]]; then
+            printf "## [%s](https://%s/tree/%s) - (%s)\n\n" "${TAGS[$i]}" "${GIT_URL}" "${TAGS[$i]}" "${DATE}"
+        fi
+
+        if [[ -n "${TAGS[$i + 1]}" ]]; then
+
+            if [[ "${GIT_URL}" =~ "github" ]]; then
+                printf "[Full Changelog](https://%s/compare/%s...%s)\n\n" "${GIT_URL}" "${TAGS[$i + 1]}" "${TAGS[$i]}"
+            elif [[ "${GIT_URL}" =~ "bitbucket" ]]; then
+                printf "[Full Changelog](https://%s/compare/%s..%s)\n\n" "${GIT_URL}" "${TAGS[$i]}" "${TAGS[$i + 1]}"
+            elif [[ "${GIT_URL}" =~ "gitlab" ]]; then
+                printf "[Full Changelog](https://%s/compare/%s...%s)\n\n" "${GIT_URL}" "${TAGS[$i + 1]}" "${TAGS[$i]}"
+            fi
+
+        fi
+
+        if [ "${i}" -eq "$((TAGS_LENGTH - 1))" ]; then
+
+            printf "%s   %s\n" "-" "${INITIAL_RELEASE}"
+
+        elif [ "${#MERGES[@]}" -eq 0 ]; then
+
+            printf "%s   %s\n" "-" "${NO_MERGES_FOUND_MESSAGE}"
+
+        else
+
+            for MERGE in "${MERGES[@]}"; do
+
+                local COMMIT_MESSAGE
+                local PR_MERGE_NUMBER
+                local PR_MERGE_NUMBER
+
+                IS_MERGE=$(git log -n1 --pretty=full "${MERGE}" | grep --fixed-strings "Merge")
+
+                if [[ -z "${IS_MERGE}" && ${INCLUDE_INCOMPLETE_MERGES} == true ]]; then
+                    COMMIT_MESSAGE=$(git log -n1 --pretty=format:'%s' "${MERGE}" | sed -E 's/ (#[0-9]*)//')
+                else
+                    COMMIT_MESSAGE=$(git log -n1 --pretty=format:'%b' "${MERGE}")
+                fi
+
+                PR_MERGE_NUMBER=$(git log -n1 --pretty=format:'%s' "${MERGE}" | grep -o -E '#[0-9]+' | sed -E 's/#//')
+
+                if [[ -n "${COMMIT_MESSAGE}" && "${PR_MERGE_NUMBER}" -gt 0 ]]; then
+
+                    if [[ "${GIT_URL}" =~ "github" ]]; then
+                        printf "%s   %s [#%s](https://%s/pull/%i)\n" "-" "${COMMIT_MESSAGE}" "${PR_MERGE_NUMBER}" "${GIT_URL}" "${PR_MERGE_NUMBER}"
+                    elif [[ "${GIT_URL}" =~ "bitbucket" ]]; then
+                        printf "%s   %s [#%s](https://%s/pull-requests/%i)\n" "-" "${COMMIT_MESSAGE}" "${PR_MERGE_NUMBER}" "${GIT_URL}" "${PR_MERGE_NUMBER}"
+                    elif [[ "${GIT_URL}" =~ "gitlab" ]]; then
+                        printf "%s   %s [#%s](https://%s/merge_requests/%i)\n" "-" "${COMMIT_MESSAGE}" "${PR_MERGE_NUMBER}" "${GIT_URL}" "${PR_MERGE_NUMBER}"
+                    fi
+
+                fi
+
+            done
+
+            printf "\n"
+
+        fi
+
+    done
+
+}
+
+outputFooter() {
+
+    printf "\n_This changelog was generated with **[generate-local-changelog](https://github.com/neogeek/generate-local-changelog)**_\n"
+
+}
+
+parseOptions "$@"
+
+parseTags
+
+outputChangelog
+
+outputFooter
