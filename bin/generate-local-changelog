@@ -151,7 +151,7 @@ outputChangelog() {
 
         elif [ "${#MERGES[@]}" -eq 0 ]; then
 
-            printf "%s   %s\n" "-" "${NO_MERGES_FOUND_MESSAGE}"
+            printf "%s %s\n" "-" "${NO_MERGES_FOUND_MESSAGE}"
 
         else
 
@@ -174,11 +174,11 @@ outputChangelog() {
                 if [[ -n "${COMMIT_MESSAGE}" && "${PR_MERGE_NUMBER}" -gt 0 ]]; then
 
                     if [[ "${GIT_URL}" =~ "github" ]]; then
-                        printf "%s   %s [#%s](https://%s/pull/%i)\n" "-" "${COMMIT_MESSAGE}" "${PR_MERGE_NUMBER}" "${GIT_URL}" "${PR_MERGE_NUMBER}"
+                        printf "%s %s [#%s](https://%s/pull/%i)\n" "-" "${COMMIT_MESSAGE}" "${PR_MERGE_NUMBER}" "${GIT_URL}" "${PR_MERGE_NUMBER}"
                     elif [[ "${GIT_URL}" =~ "bitbucket" ]]; then
-                        printf "%s   %s [#%s](https://%s/pull-requests/%i)\n" "-" "${COMMIT_MESSAGE}" "${PR_MERGE_NUMBER}" "${GIT_URL}" "${PR_MERGE_NUMBER}"
+                        printf "%s %s [#%s](https://%s/pull-requests/%i)\n" "-" "${COMMIT_MESSAGE}" "${PR_MERGE_NUMBER}" "${GIT_URL}" "${PR_MERGE_NUMBER}"
                     elif [[ "${GIT_URL}" =~ "gitlab" ]]; then
-                        printf "%s   %s [#%s](https://%s/merge_requests/%i)\n" "-" "${COMMIT_MESSAGE}" "${PR_MERGE_NUMBER}" "${GIT_URL}" "${PR_MERGE_NUMBER}"
+                        printf "%s %s [#%s](https://%s/merge_requests/%i)\n" "-" "${COMMIT_MESSAGE}" "${PR_MERGE_NUMBER}" "${GIT_URL}" "${PR_MERGE_NUMBER}"
                     fi
 
                 fi
