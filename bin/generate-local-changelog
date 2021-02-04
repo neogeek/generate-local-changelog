@@ -147,11 +147,11 @@ outputChangelog() {
 
         if [ "${i}" -eq "$((TAGS_LENGTH - 1))" ]; then
 
-            printf "%s %s\n" "-" "${INITIAL_RELEASE}"
+            printf "%s %s\n\n" "-" "${INITIAL_RELEASE}"
 
         elif [ "${#MERGES[@]}" -eq 0 ]; then
 
-            printf "%s %s\n" "-" "${NO_MERGES_FOUND_MESSAGE}"
+            printf "%s %s\n\n" "-" "${NO_MERGES_FOUND_MESSAGE}"
 
         else
 
