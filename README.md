@@ -2,7 +2,7 @@
 
 > Generate a CHANGELOG for your project using only local git history. No internet connection or git server API is required.
 
-[![Build Status](https://travis-ci.com/neogeek/generate-local-changelog.svg?branch=master)](https://travis-ci.com/neogeek/generate-local-changelog)
+[![Tests](https://github.com/neogeek/generate-local-changelog/actions/workflows/test.workflow.yml/badge.svg)](https://github.com/neogeek/generate-local-changelog/actions/workflows/test.workflow.yml)
 
 ## Install
 
