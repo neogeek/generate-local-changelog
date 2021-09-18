@@ -1,5 +1,4 @@
 test:
-	shellcheck ./bin/generate-local-changelog
 	@test/bitbucket.sh
 	@test/github.sh
 	@test/gitlab.sh
