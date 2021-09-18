@@ -195,7 +195,7 @@ outputChangelog() {
 
 outputFooter() {
 
-    printf "\n_This changelog was generated with **[generate-local-changelog](https://github.com/neogeek/generate-local-changelog)**_\n"
+    printf "_This changelog was generated with **[generate-local-changelog](https://github.com/neogeek/generate-local-changelog)**_\n"
 
 }
 
