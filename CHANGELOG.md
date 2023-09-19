@@ -1,6 +1,6 @@
 # Changelog
 
-## [HEAD](https://github.com/neogeek/generate-local-changelog/tree/HEAD) - (2022-06-30)
+## [HEAD](https://github.com/neogeek/generate-local-changelog/tree/HEAD) - (2023-09-19)
 
 [Full Changelog](https://github.com/neogeek/generate-local-changelog/compare/v1.0.3...HEAD)
 

@@ -1,10 +1,23 @@
-test:
-	@test/bitbucket.sh
-	@test/github.sh
-	@test/gitlab.sh
-	@(git remote rm origin && git remote add origin git@github.com:neogeek/generate-local-changelog.git)
+help:
+	@fgrep -h "##" $(MAKEFILE_LIST) | sed -e 's/## //' | tail -n +2
 
-changelog:
-	./bin/generate-local-changelog > CHANGELOG.md
+build: ## Build release
+	cargo build --release
+	mkdir -p ./bin
+	cp ./target/release/generate-local-changelog ./bin/generate-local-changelog
 
-.PHONY: test
+format: ## Format code
+	cargo fmt
+
+lint: ## Run lint
+	cargo clippy
+
+test: ## Run tests
+	cargo test
+
+docs: ## Generate and open docs
+	cargo doc
+	open target/doc/generate_local_changelog/index.html
+
+changelog: ## Generate changelog
+	./bin/generate-local-changelog --unreleased > CHANGELOG.md
