@@ -1,0 +1,48 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          export PATH="$HOME/.cargo/bin:$PATH"
+
+      - name: Print Rust and Cargo versions
+        run: |
+          rustc --version
+          cargo --version
+
+      - name: Build release
+        run: cargo build --release
+
+      - name: Copy release build to bin folder
+        run: |
+          mkdir -p bin
+          cp -r ./target/release/generate-local-changelog ./bin/generate-local-changelog
+
+      - name: Setup git
+        run: |
+          git config user.name "neogeek-bot"
+          git config user.email "bot@neogeek.dev"
+
+      - name: Git commit changes
+        run: |
+          git add ./bin/generate-local-changelog
+          git commit -m "Updated generate-local-changelog [skip ci]" || exit 0
+          git push origin main
