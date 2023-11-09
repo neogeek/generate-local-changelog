@@ -151,11 +151,9 @@ mod tests {
 
         let remote_origin = crate::git::get_remote_origin(&repo);
 
-        let is_http_url =
-            remote_origin == "https://github.com/neogeek/generate-local-changelog";
+        let is_http_url = remote_origin == "https://github.com/neogeek/generate-local-changelog";
 
-        let is_git_url =
-            remote_origin == "git@github.com:neogeek/generate-local-changelog.git";
+        let is_git_url = remote_origin == "git@github.com:neogeek/generate-local-changelog.git";
 
         assert!(is_http_url || is_git_url);
     }
