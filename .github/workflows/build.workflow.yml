@@ -18,7 +18,7 @@ jobs:
       - name: Install Rust
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-          export PATH="$HOME/.cargo/bin:$PATH"
+          echo "$HOME/.cargo/bin:$PATH" >> $GITHUB_PATH
 
       - name: Print Rust and Cargo versions
         run: |
