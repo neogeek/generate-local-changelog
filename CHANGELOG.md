@@ -1,10 +1,10 @@
 # Changelog
 
-## [HEAD](https://github.com/neogeek/generate-local-changelog/tree/HEAD) - (2023-09-19)
+## [HEAD](https://github.com/neogeek/generate-local-changelog/tree/HEAD) - (2024-04-10)
 
 [Full Changelog](https://github.com/neogeek/generate-local-changelog/compare/v1.0.3...HEAD)
 
-- No merges found
+- [feat] Rewrote tool in rust. [#1](https://github.com/neogeek/generate-local-changelog/pull/1)
 
 ## [v1.0.3](https://github.com/neogeek/generate-local-changelog/tree/v1.0.3) - (2021-02-04)
 
