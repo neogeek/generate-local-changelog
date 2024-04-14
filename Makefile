@@ -2,9 +2,10 @@ help:
 	@fgrep -h "##" $(MAKEFILE_LIST) | sed -e 's/## //' | tail -n +2
 
 build: ## Build release
-	cargo build --release
-	mkdir -p ./bin
-	cp ./target/release/generate-local-changelog ./bin/generate-local-changelog
+	./build.sh
+
+bundle:
+	lipo -create -output ./bin/generate-local-changelog ./bin/arm64/generate-local-changelog ./bin/x86_64/generate-local-changelog
 
 format: ## Format code
 	cargo fmt
