@@ -1,9 +1,10 @@
 # Changelog
 
-## [HEAD](https://github.com/neogeek/generate-local-changelog/tree/HEAD) - (2024-04-10)
+## [v2.0.0](https://github.com/neogeek/generate-local-changelog/tree/v2.0.0) - (2024-04-14)
 
-[Full Changelog](https://github.com/neogeek/generate-local-changelog/compare/v1.0.3...HEAD)
+[Full Changelog](https://github.com/neogeek/generate-local-changelog/compare/v1.0.3...v2.0.0)
 
+- [feat] Added build script. [#2](https://github.com/neogeek/generate-local-changelog/pull/2)
 - [feat] Rewrote tool in rust. [#1](https://github.com/neogeek/generate-local-changelog/pull/1)
 
 ## [v1.0.3](https://github.com/neogeek/generate-local-changelog/tree/v1.0.3) - (2021-02-04)
