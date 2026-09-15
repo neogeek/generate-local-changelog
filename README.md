@@ -2,6 +2,7 @@
 
 > Generate a CHANGELOG for your project using only local git history. No internet connection or git server API is required.
 
+[![Build](https://github.com/neogeek/generate-local-changelog/actions/workflows/build.workflow.yml/badge.svg)](https://github.com/neogeek/generate-local-changelog/actions/workflows/build.workflow.yml)
 [![Tests](https://github.com/neogeek/generate-local-changelog/actions/workflows/test.workflow.yml/badge.svg)](https://github.com/neogeek/generate-local-changelog/actions/workflows/test.workflow.yml)
 
 ## Install
