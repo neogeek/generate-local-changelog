@@ -1,5 +1,11 @@
 # Changelog
 
+## [v2.0.2](https://github.com/neogeek/generate-local-changelog/tree/v2.0.2) - (2026-09-15)
+
+[Full Changelog](https://github.com/neogeek/generate-local-changelog/compare/v2.0.1...v2.0.2)
+
+- No merges found
+
 ## [v2.0.1](https://github.com/neogeek/generate-local-changelog/tree/v2.0.1) - (2026-09-15)
 
 [Full Changelog](https://github.com/neogeek/generate-local-changelog/compare/v2.0.0...v2.0.1)
