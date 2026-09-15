@@ -7,6 +7,7 @@
 ## Install
 
 ```bash
+$ brew trust neogeek/generate-local-changelog
 $ brew tap neogeek/generate-local-changelog
 $ brew install generate-local-changelog
 ```
