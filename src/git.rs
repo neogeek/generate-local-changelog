@@ -102,16 +102,15 @@ pub fn get_merges_between_tags(
     revwalk.hide(tag_b_ref).unwrap();
     revwalk.push(tag_a_ref).unwrap();
 
-    let pattern = Regex::new(r"#([0-9]+)").unwrap();
+    let pr_number_pattern = Regex::new(r"#([0-9]+)").unwrap();
 
     for oid in revwalk {
         let commit = repo.find_commit(oid.unwrap()).unwrap();
 
         let commit_message = commit.message().unwrap_or("No message");
 
-        if (incomplete || commit.parent_count() > 1) && pattern.is_match(commit_message) {
-            let pr_number = Regex::new(r"#([0-9]+)")
-                .unwrap()
+        if (incomplete || commit.parent_count() > 1) && pr_number_pattern.is_match(commit_message) {
+            let pr_number = pr_number_pattern
                 .captures(commit_message)
                 .unwrap()
                 .get(1)
