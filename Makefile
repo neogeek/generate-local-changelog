@@ -4,9 +4,6 @@ help:
 build: ## Build release
 	./build.sh
 
-bundle:
-	lipo -create -output ./bin/generate-local-changelog ./bin/arm64/generate-local-changelog ./bin/x86_64/generate-local-changelog
-
 format: ## Format code
 	cargo fmt
 
@@ -21,4 +18,4 @@ docs: ## Generate and open docs
 	open target/doc/generate_local_changelog/index.html
 
 changelog: ## Generate changelog
-	./bin/generate-local-changelog --unreleased > CHANGELOG.md
+	./bin/arm64/generate-local-changelog --unreleased > CHANGELOG.md

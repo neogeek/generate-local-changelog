@@ -1,6 +1,9 @@
 name: Build
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
@@ -9,37 +12,85 @@ concurrency:
 
 jobs:
   build:
-    name: Build
-    runs-on: ubuntu-latest
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+            artifact_name: generate-local-changelog-macos-x86_64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: generate-local-changelog-macos-aarch64
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: generate-local-changelog-linux
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install Rust
+      - name: Configure rust
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-          echo "$HOME/.cargo/bin:$PATH" >> $GITHUB_PATH
-
-      - name: Print Rust and Cargo versions
-        run: |
-          rustc --version
-          cargo --version
+          rustup toolchain install stable
+          rustup target add ${{ matrix.target }}
 
       - name: Build release
-        run: cargo build --release
+        run: cargo build --release --target ${{ matrix.target }}
 
       - name: Copy release build to bin folder
         run: |
           mkdir -p bin
-          cp -r ./target/release/generate-local-changelog ./bin/generate-local-changelog
+          cp target/${{ matrix.target }}/release/generate-local-changelog bin/${{ matrix.artifact_name }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ matrix.target }}
+          path: bin/${{ matrix.artifact_name }}
+
+  commit-changes:
+    name: Commit Build Files
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: bin/
+          merge-multiple: true
 
       - name: Setup git
         run: |
-          git config user.name "neogeek-bot"
-          git config user.email "bot@neogeek.dev"
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Rearrange files
+        run: |
+          mkdir -p bin/macos/x86_64
+          mv bin/generate-local-changelog-macos-x86_64 bin/macos/x86_64/generate-local-changelog
+          chmod +x bin/macos/x86_64/generate-local-changelog
+
+          mkdir -p bin/macos/aarch64
+          mv bin/generate-local-changelog-macos-aarch64 bin/macos/aarch64/generate-local-changelog
+          chmod +x bin/macos/aarch64/generate-local-changelog
+
+          mkdir -p bin/linux
+          mv bin/generate-local-changelog-linux bin/linux/generate-local-changelog
+          chmod +x bin/linux/generate-local-changelog
 
       - name: Git commit changes
         run: |
-          git add ./bin/generate-local-changelog
+          git add ./bin
           git commit -m "Updated generate-local-changelog [skip ci]" || exit 0
           git push origin main

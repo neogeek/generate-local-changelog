@@ -1,11 +1,11 @@
 name: Tests
 
 on:
-  workflow_dispatch:
   pull_request:
-    types: [opened, synchronize, edited, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - main
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,24 +13,18 @@ concurrency:
 
 jobs:
   test:
-    name: Test
     runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    name: Test
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install Rust
+      - name: Configure rust
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-          echo "$HOME/.cargo/bin:$PATH" >> $GITHUB_PATH
-
-      - name: Print Rust and Cargo versions
-        run: |
-          rustc --version
-          cargo --version
-
-      - name: Install Clippy
-        run: rustup component add clippy
+          rustup toolchain install stable
+          rustup target add ${{ matrix.target }}
 
       - name: Run Check
         run: cargo check
